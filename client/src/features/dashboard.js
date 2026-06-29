@@ -10,7 +10,15 @@ const TraineeDashboard = () => {
       .then(setData);
   }, [API_URL]);
 
-  if (!data) return <div className="p-8 text-center">טוען נתונים...</div>;
+ if (!data) return <div className="p-8 text-center">טוען נתונים...</div>;
+
+  if (data.error) {
+    return (
+      <div className="p-8 text-center text-red-500 font-bold" dir="rtl">
+        ⚠️ שגיאה בטעינת הנתונים מהשרת: {data.error}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 p-4" dir="rtl">
@@ -44,7 +52,7 @@ const TraineeDashboard = () => {
       
       <section className="mt-8">
         <h3 className="text-lg font-bold mb-4">פעילות אחרונה</h3>
-        {data.recentWorkouts.map(workout => (
+        {data.recentWorkouts?.map(workout => (
           <div key={workout.id} className="flex items-center justify-between p-4 bg-white rounded-xl mb-2 shadow-sm border border-slate-100">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-50 rounded-lg">🏋️</div>

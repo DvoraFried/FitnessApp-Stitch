@@ -6,6 +6,10 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 dotenv.config();
 
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB successfully!'))
+  .catch((err) => console.error('MongoDB connection error:', err));
+
 const app = express();
 app.use(cors());
 app.use(express.json());
