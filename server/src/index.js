@@ -75,6 +75,39 @@ app.post('/api/ai/chat', async (req, res) => {
   }
 });
 
+// 🔥 ה-Route החדש והחסר עבור ה-Dashboard של המתאמן
+app.get('/api/trainee/:traineeId', async (req, res) => {
+  const { traineeId } = req.params;
+  
+  try {
+    // משיכת משקל אחרון מה-DB
+    const latestWeight = await ProgressLog.findOne({ trainee_id: traineeId, metric_type: 'משקל' }).sort({ date: -1 });
+    // משיכת דופק אחרון מה-DB
+    const latestBPM = await ProgressLog.findOne({ trainee_id: traineeId, metric_type: 'דופק מנוחה' }).sort({ date: -1 });
+    // משיכת 3 אימונים אחרונים מה-DB
+    const dbWorkouts = await Workout.find({ trainee_id: traineeId }).sort({ timestamp: -1 }).limit(3);
+
+    const recentWorkouts = dbWorkouts.map(w => ({
+      id: w._id,
+      type: w.workout_type,
+      date: new Date(w.timestamp).toLocaleDateString('he-IL'),
+      duration: w.duration
+    }));
+
+    // החזרת הנתונים ל-Frontend (אם ה-DB ריק, ישלחו נתוני ברירת מחדל כדי שהאתר יעבוד יפה)
+    res.json({
+      weight: latestWeight ? latestWeight.value : 74.2,
+      bpm: latestBPM ? latestBPM.value : 68,
+      recentWorkouts: recentWorkouts.length > 0 ? recentWorkouts : [
+        { id: 'w1', type: 'אימון כוח', date: 'אתמול', duration: 45 },
+        { id: 'w2', type: 'ריצת אירובי', date: 'לפני יומיים', duration: 30 }
+      ]
+    });
+  } catch (error) {
+    res.status(500).json({ error: "שגיאה בטעינת נתוני המתאמן" });
+  }
+});
+
 // Coach Aggregation Logic
 app.get('/api/coach/stats/:traineeId', async (req, res) => {
   const { traineeId } = req.params;
